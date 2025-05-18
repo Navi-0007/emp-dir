@@ -1,0 +1,80 @@
+{% extends "main.html" %}
+{% block page_header %}Sign In to Employee Directory{% endblock %}
+{% block body %}
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-5">
+      <div class="card shadow">
+        <div class="card-body">
+          <h3 class="card-title text-center mb-4">Login</h3>
+          <div id="step1">
+            <div class="form-group">
+              <label for="login_email" class="font-weight-bold">Email</label>
+              <input type="email" id="login_email" class="form-control" placeholder="Enter your email" required>
+            </div>
+            <button class="btn btn-primary btn-block" onclick="checkLoginEmail()">Next</button>
+            <div id="login_email_error" class="text-danger mt-2"></div>
+          </div>
+          <form id="login_form" method="POST" style="display:none;" autocomplete="off">
+            {{ form.hidden_tag() }}
+            <input type="hidden" name="username" id="hidden_login_email">
+            <div class="form-group">
+              <label for="login_password" class="font-weight-bold">Password</label>
+              <div class="input-group">
+                <input type="password" name="password" class="form-control" placeholder="Password" id="login_password">
+                <div class="input-group-append">
+                  <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                    <i class="fa fa-eye"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block" id="loginBtn">
+              <span id="loginSpinner" class="spinner-border spinner-border-sm d-none"></span>
+              Login
+            </button>
+          </form>
+          {% if error %}
+          <div class="alert alert-danger mt-3">{{ error }}</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+function checkLoginEmail() {
+  let email = document.getElementById('login_email').value;
+  fetch('/check_email', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({email})
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.exists) {
+      document.getElementById('step1').style.display = 'none';
+      document.getElementById('login_form').style.display = 'block';
+      document.getElementById('hidden_login_email').value = email;
+    } else {
+      // Redirect to register with email as query param
+      window.location.href = '/register?email=' + encodeURIComponent(email);
+    }
+  });
+}
+
+document.getElementById('togglePassword').onclick = function() {
+  var pwd = document.getElementById('login_password');
+  if (pwd.type === "password") {
+    pwd.type = "text";
+    this.innerHTML = '<i class="fa fa-eye-slash"></i>';
+  } else {
+    pwd.type = "password";
+    this.innerHTML = '<i class="fa fa-eye"></i>';
+  }
+};
+document.getElementById('login_form').onsubmit = function() {
+  document.getElementById('loginSpinner').classList.remove('d-none');
+};
+</script>
+{% endblock %}

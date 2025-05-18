@@ -1,0 +1,65 @@
+{% extends "main.html" %}
+{% block head %}Register - Employee Directory{% endblock %}
+{% block body %}
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card shadow">
+        <div class="card-body">
+          <h3 class="card-title mb-4 text-center">Register Account</h3>
+          <form id="register_form" autocomplete="off">
+            <div class="form-group">
+              <label for="reg_name">Full Name</label>
+              <input type="text" id="reg_name" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label for="reg_email">Email</label>
+              <input type="email" id="reg_email" class="form-control" required value="{{ request.args.get('email', '') }}">
+            </div>
+            <div class="form-group">
+              <label for="reg_password">Password</label>
+              <input type="password" id="reg_password" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label for="reg_hrcode">HR Code</label>
+              <input type="text" id="reg_hrcode" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Register</button>
+            <div id="register_error" class="text-danger mt-2"></div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+// Fallback for JS navigation: autofill email from URL if present
+window.onload = function() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('email')) {
+    document.getElementById('reg_email').value = params.get('email');
+  }
+};
+document.getElementById('register_form').onsubmit = function(e) {
+  e.preventDefault();
+  fetch('/register', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      name: document.getElementById('reg_name').value,
+      email: document.getElementById('reg_email').value,
+      password: document.getElementById('reg_password').value,
+      hrcode: document.getElementById('reg_hrcode').value
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      window.location.href = '/dashboard';
+    } else {
+      document.getElementById('register_error').innerText = data.error || 'Registration failed';
+    }
+  });
+};
+</script>
+{% endblock %}
